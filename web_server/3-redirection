@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Configuring my nginx server to redirect to another page
+
+apt-get update
+apt-get -y install nginx
+
+# Adding a HTML page
+echo "Holberton School" > /var/www/html/index.html
+
+CONFIG=\
+"server {
+	listen 80 default_server;
+  	listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        index index.html index.htm index.nginx-debian.html;
+	server_name _;
+	rewrite ^/redirect_me(.*)$ http://www.google.com/ permanent;
+        location / {
+                try_files \$uri \$uri/ =404;
+	}
+}"
+
+echo -e "$CONFIG" > /etc/nginx/sites-enabled/default
+
+# Checking if the service is running
+
+state=$(pgrep nginx)
+
+if [ -n "$state" ];
+then
+	sudo service nginx restart
+	echo "Restarting Nginx, please wait"
+else
+	sudo service nginx start
+	echo "Nginx has started"
+fi
